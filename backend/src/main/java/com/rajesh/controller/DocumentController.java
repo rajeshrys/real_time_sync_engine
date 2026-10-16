@@ -1,0 +1,68 @@
+package com.rajesh.controller;
+
+
+import com.rajesh.dto.Documents.CreateDocumentRequest;
+import com.rajesh.dto.Documents.UpdateDocumentRequest;
+import com.rajesh.model.Document;
+import com.rajesh.service.documents.DocumentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/documents")
+@RequiredArgsConstructor
+public class DocumentController {
+    private final DocumentService documentService;
+
+    @PostMapping
+    public ResponseEntity<Document> createDocument(
+            @RequestBody CreateDocumentRequest request
+    ) {
+
+        return ResponseEntity.ok(
+                documentService.createDocument(request)
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Document>> getAllDocuments() {
+
+        return ResponseEntity.ok(
+                documentService.getAllDocuments()
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Document> getDocument(
+            @PathVariable Long id
+    ) {
+
+        return ResponseEntity.ok(
+                documentService.getDocumentById(id)
+        );
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Document> updateDocument(
+            @PathVariable Long id,
+            @RequestBody UpdateDocumentRequest request
+    ) {
+
+        return ResponseEntity.ok(
+                documentService.updateDocument(id, request)
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDocument(
+            @PathVariable Long id
+    ) {
+
+        documentService.deleteDocument(id);
+
+        return ResponseEntity.noContent().build();
+    }
+}
