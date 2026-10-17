@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface DocumentService {
 
-    Document createDocument(CreateDocumentRequest request);
+    Document createDocument(CreateDocumentRequest request) throws Exception;
 
     List<Document> getAllDocuments();
 

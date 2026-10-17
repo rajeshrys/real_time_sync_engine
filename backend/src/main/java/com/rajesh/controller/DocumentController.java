@@ -20,7 +20,7 @@ public class DocumentController {
     @PostMapping
     public ResponseEntity<Document> createDocument(
             @RequestBody CreateDocumentRequest request
-    ) {
+    ) throws Exception {
 
         return ResponseEntity.ok(
                 documentService.createDocument(request)

@@ -27,7 +27,6 @@ const Login = () => {
 
     try {
       const token = await login({ email, password });
-      console.log(token);
       navigate(from, { replace: true });
     } catch (err: any) {
       console.error(err);
