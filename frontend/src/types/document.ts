@@ -16,3 +16,12 @@ export interface UpdateDocumentRequest {
     title: string;
     content: object | null;
 }
+
+export interface DocumentResponse {
+  id: number;
+  title: string;
+  content: object | null;
+  ownerId: number;
+  createdAt?: string;
+  updatedAt?: string;
+}

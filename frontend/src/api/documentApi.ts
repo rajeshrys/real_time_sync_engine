@@ -1,14 +1,14 @@
 import api from "./axios";
 
-import type { Document,CreateDocumentRequest,UpdateDocumentRequest } from "../types/document";
+import type { Document,CreateDocumentRequest,UpdateDocumentRequest ,DocumentResponse} from "../types/document";
 
 export const createDocument = async(data: CreateDocumentRequest): Promise<Document> =>{
     const response = await api.post<Document>("/documents",data);
     return response.data;
 }
 
-export const getDocuments = async(): Promise<Document[]> =>{
-    const response = await api.get<Document[]>("/documents");
+export const getDocuments = async(): Promise<DocumentResponse[]> =>{
+    const response = await api.get("/documents");
     return response.data;
 }
 

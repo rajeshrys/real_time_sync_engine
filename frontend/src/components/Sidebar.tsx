@@ -10,14 +10,8 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth";
-
-// TODO: replace with data from your Document API (most recently edited first)
-const recentDocuments = [
-  { id: "1", title: "Project roadmap" },
-  { id: "2", title: "Sprint planning notes" },
-  { id: "3", title: "API design draft" },
-  { id: "4", title: "Meeting minutes" },
-];
+import { useEffect,useState } from "react";
+import { getDocuments } from "../api/documentApi";
 
 const navItems = [
   { to: "/dashboard", label: "My documents", icon: FileText, end: true },
@@ -41,6 +35,10 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ open, onClose }: SidebarProps) => {
+
+const [recentDocuments,setRecentDocuments] = useState<DocumentResponse[]>([]);
+const [loadingDocuments ,setLoadingDocuments] = useState(true);
+
   const { user, logout } = useAuth() as ReturnType<typeof useAuth> & {
     logout?: () => void | Promise<void>;
   };
@@ -52,6 +50,24 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
     await logout?.();
     navigate("/login", { replace: true });
   };
+
+  // fetching the documents of the user
+  useEffect(()=>{
+    const fetchDocuments= async()=>{
+      try{
+        setLoadingDocuments(true);
+        const documents = await getDocuments();
+        setRecentDocuments(documents);
+      }
+      catch(error){
+        console.log("failed to fetch documents:",error);
+      }
+      finally{
+        setLoadingDocuments(false);
+      }
+    }
+    fetchDocuments();
+  },[])
 
   return (
     <>
@@ -101,6 +117,7 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
           </button>
         </div>
 
+
         {/* Library */}
         <nav className="mt-3 space-y-0.5 px-3" aria-label="Library">
           {navItems.map(({ to, label, icon: Icon, end }) => (
@@ -121,9 +138,15 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
         <div className="mt-6 min-h-0 flex-1 overflow-y-auto px-3">
           <p className="px-3 pb-2 text-xs text-gray-500">Recents</p>
 
-          {recentDocuments.length === 0 ? (
+          {
+            loadingDocuments ? (
+          <p className="px-3 text-sm text-gray-500">
+            Loading documents...
+          </p>
+          )
+          : recentDocuments.length === 0 ? (
             <p className="px-3 text-sm text-gray-500">
-              Documents you open will show up here.
+              No Documnets yet.
             </p>
           ) : (
             <ul className="space-y-0.5">
@@ -134,7 +157,9 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
                     className={itemClass}
                     onClick={onClose}
                   >
-                    <span className="truncate">{doc.title}</span>
+                    <FileText className="h-4 w-4 shrink-0" />
+
+                    <span className="truncate">{doc.title || "Untitled document"}</span>
                   </NavLink>
                 </li>
               ))}
