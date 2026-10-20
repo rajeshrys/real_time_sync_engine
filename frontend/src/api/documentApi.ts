@@ -3,7 +3,7 @@ import api from "./axios";
 import type { Document,CreateDocumentRequest,UpdateDocumentRequest ,DocumentResponse} from "../types/document";
 
 export const createDocument = async(data: CreateDocumentRequest): Promise<Document> =>{
-    const response = await api.post<Document>("/documents",data);
+    const response = await api.post<Document>("/documents/new",data);
     return response.data;
 }
 

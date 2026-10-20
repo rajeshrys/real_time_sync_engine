@@ -17,7 +17,7 @@ import java.util.List;
 public class DocumentController {
     private final DocumentService documentService;
 
-    @PostMapping
+    @PostMapping("/new")
     public ResponseEntity<Document> createDocument(
             @RequestBody CreateDocumentRequest request
     ) throws Exception {

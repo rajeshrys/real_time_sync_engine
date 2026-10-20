@@ -1,7 +1,10 @@
-import { FilePlus, FolderOpen } from "lucide-react";
+import { FilePlus, FolderOpen,FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
+import { useEffect,useState } from "react";
+import { getDocuments } from "../api/documentApi";
+import {type DocumentResponse } from "../types/document";
 
 
 
@@ -29,6 +32,28 @@ const Dashboard = ({ view = "mine" }: { view?: View }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { title, empty, hint } = copy[view];
+  const [loading,setLoading] = useState(true);
+  const [documents,setDocuments] = useState<DocumentResponse[]>([]);
+
+  useEffect(()=>{
+    if(view!="mine"){
+      setLoading(false);
+      return;
+    }
+    const fetchDocuments = async()=>{
+      try {
+        setLoading(true);
+        const data = await getDocuments();
+        setDocuments(data);
+      } catch (error) {
+        console.log("failed to fetch documents:",error);
+      }
+      finally{
+        setLoading(false);
+      }
+    }
+    fetchDocuments();
+  },[view])
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
@@ -53,14 +78,55 @@ const Dashboard = ({ view = "mine" }: { view?: View }) => {
         )}
       </div>
 
-      {/* TODO: render the document list from the Document API; keep as empty state */}
-      <section className="mt-10 rounded-xl border border-dashed border-gray-300 px-6 py-20 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-          <FolderOpen className="h-7 w-7 text-gray-400" />
-        </div>
-        <h2 className="mt-5 text-lg font-semibold text-gray-900">{empty}</h2>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-gray-500">{hint}</p>
-      </section>
+      {view === "mine" && 
+      <section className="mt-10">
+        {loading ? (
+           <p className="text-sm text-gray-500">
+              Loading documents...
+            </p>
+        ): documents.length === 0 ? (
+           <div className="rounded-xl border border-dashed border-gray-300 px-6 py-20 text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+                <FolderOpen className="h-7 w-7 text-gray-400" />
+              </div>
+
+              <h2 className="mt-5 text-lg font-semibold text-gray-900">
+                {empty}
+              </h2>
+
+              <p className="mx-auto mt-2 max-w-sm text-sm text-gray-500">
+                {hint}
+              </p>
+            </div>
+          )
+        : (
+            <div className="space-y-2">
+              {documents.map((document) => (
+                <button
+                  key={document.id}
+                  onClick={() => navigate(`/documents/${document.id}`)}
+                  className="flex w-full items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 text-left transition hover:bg-gray-50"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                    <FileText className="h-5 w-5 text-gray-600" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-gray-900">
+                      {document.title || "Untitled document"}
+                    </p>
+
+                    <p className="mt-1 text-xs text-gray-500">
+                      Document
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+        </section>
+}
     </div>
   );
 };

@@ -1,7 +1,6 @@
 package com.rajesh.service.user;
 
 import com.rajesh.dto.Auth.UserResponse;
-import com.rajesh.dto.UserSearchResponse;
 import com.rajesh.model.User;
 
 import java.util.List;
@@ -18,6 +17,4 @@ public interface UserService {
     void deleteUser(Long id) throws Exception;
 
     UserResponse getCurrentUser(String email);
-
-    List<UserSearchResponse> searchUsers(String email,Long id );
 }

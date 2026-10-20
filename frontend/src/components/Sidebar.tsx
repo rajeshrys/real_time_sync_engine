@@ -12,6 +12,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import { useEffect,useState } from "react";
 import { getDocuments } from "../api/documentApi";
+import {type DocumentResponse } from "../types/document";
 
 const navItems = [
   { to: "/dashboard", label: "My documents", icon: FileText, end: true },

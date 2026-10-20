@@ -27,14 +27,16 @@ const App = () => {
 
         
     {/* Authenticated: wrap in <Route element={<ProtectedRoute />}> ... </Route> */}
+    <Route element={<ProtectedRoute />}>
     <Route element={<AppLayout />}>
       <Route path="/dashboard" element={<Dashboard view="mine" />} />
       <Route path="/dashboard/shared" element={<Dashboard view="shared" />} />
       <Route path="/dashboard/trash" element={<Dashboard view="trash" />} />
       <Route path="/documents/:id" element={<DocumentEditor />} />
     </Route>
+    </Route>
   </Routes>
-    </BrowserRouter>
+  </BrowserRouter>
   );
 };
 

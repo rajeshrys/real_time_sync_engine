@@ -66,7 +66,7 @@ const DocumentEditor = () => {
       setSaving(true);
 
       if (documentId === null) {
-        const response = await api.post("/documents", { title, content });
+        const response = await api.post("/documents/new", { title, content });
         setDocumentId(response.data.id);
         setStatus({ type: "success", message: "Document created." });
       } else {
