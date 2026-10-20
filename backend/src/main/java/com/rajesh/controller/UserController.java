@@ -1,6 +1,7 @@
 package com.rajesh.controller;
 
 import com.rajesh.dto.Auth.UserResponse;
+import com.rajesh.dto.UserSearchResponse;
 import com.rajesh.model.User;
 import com.rajesh.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,12 @@ public class UserController {
         String email = authentication.getName();
         UserResponse response = userService.getCurrentUser(email);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/search")
+    public List<UserSearchResponse> searchUsers(@RequestParam String email,Authentication authentication){
+        Long currentUserId = Long.parseLong(authentication.getName());
+        return userService.searchUsers(email,currentUserId);
     }
 
 }

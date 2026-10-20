@@ -2,8 +2,10 @@ package com.rajesh.service.user;
 
 import com.rajesh.Exception.UserNotFoundException;
 import com.rajesh.dto.Auth.UserResponse;
+import com.rajesh.dto.UserSearchResponse;
 import com.rajesh.model.User;
 import com.rajesh.repository.UserRepository;
+import com.rajesh.service.Presence.PresenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PresenceService presenceService;
 
 
     @Override
@@ -84,4 +87,18 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+
+    public List<UserSearchResponse> searchUsers(String email,Long currentUserId
+    ){
+        return userRepository
+                .findByEmailContainingIgnoreCase(email)
+                .stream()
+                .filter(user -> !user.getId().equals(currentUserId))
+                .map(user-> new UserSearchResponse(
+                        user.getId(),
+                        user.getFirstName(),
+                        user.getEmail(),
+                        presenceService.isOnline(user.getId())
+                )).toList();
+    }
 }
