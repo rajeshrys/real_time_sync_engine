@@ -1,11 +1,11 @@
 package com.rajesh.service.auth;
 
 import com.rajesh.Exception.UserAlreadyExistsException;
-import com.rajesh.dto.Auth.RegisterRequest;
-import com.rajesh.dto.Auth.RegisterResponse;
+import com.rajesh.dto.Auth.register.RegisterRequest;
+import com.rajesh.dto.Auth.register.RegisterResponse;
 import com.rajesh.dto.Auth.UserResponse;
-import com.rajesh.dto.Login.LoginRequest;
-import com.rajesh.dto.Login.LoginResponse;
+import com.rajesh.dto.Auth.Login.LoginRequest;
+import com.rajesh.dto.Auth.Login.LoginResponse;
 import com.rajesh.enums.UserRole;
 import com.rajesh.model.User;
 import com.rajesh.repository.UserRepository;
@@ -26,7 +26,11 @@ public class AuthServiceImpl implements AuthService {
         if(userRepository.existsByEmail(request.getEmail())){
             throw new UserAlreadyExistsException("User already exists");
         }
+        if(userRepository.existsByUsername(request.getUsername())){
+            throw new RuntimeException("Username already exists");
+        }
         User user = User.builder()
+                .username(request.getUsername())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())

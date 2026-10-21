@@ -1,4 +1,4 @@
-package com.rajesh.dto.Login;
+package com.rajesh.dto.Auth.Login;
 
 
 import lombok.AllArgsConstructor;

@@ -7,6 +7,7 @@ import {
   Search,
   Share2,
   Trash2,
+  UserRoundPlus 
 } from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth";
@@ -18,6 +19,7 @@ const navItems = [
   { to: "/dashboard", label: "My documents", icon: FileText, end: true },
   { to: "/dashboard/shared", label: "Shared with me", icon: Share2, end: false },
   { to: "/dashboard/trash", label: "Trash", icon: Trash2, end: false },
+  {to: "/dashboard/connections",label: "Connections" ,icon: UserRoundPlus ,end: false}
 ];
 
 const itemClass = ({ isActive }: { isActive: boolean }) =>

@@ -1,5 +1,6 @@
-package com.rajesh.dto.Auth;
+package com.rajesh.dto.Auth.register;
 
+import com.rajesh.dto.Auth.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

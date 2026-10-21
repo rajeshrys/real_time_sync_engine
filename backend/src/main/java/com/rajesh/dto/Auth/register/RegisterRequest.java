@@ -1,10 +1,11 @@
-package com.rajesh.dto.Auth;
+package com.rajesh.dto.Auth.register;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +23,9 @@ public class RegisterRequest {
     @Email(message = "Invalid email format")
     private String email;
 
+    @NotBlank(message="Username is required")
+    private String username;
+
     @NotNull
     private Long phoneNumber;
 
@@ -31,6 +35,6 @@ public class RegisterRequest {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     private LocalDateTime  updatedAt;
 }

@@ -13,6 +13,7 @@ import AppLayout from "./pages/Applayout";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import DocumentEditor from "./pages/DocumentEditor";
+import Connections from "./pages/Connections";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
       <Route path="/dashboard/trash" element={<Dashboard view="trash" />} />
       <Route path="/documents/:id" element={<DocumentEditor />} />
       <Route path="/documents/new" element={<DocumentEditor />}/>
+      <Route path="/dashboard/connections" element={<Connections />}/>
     </Route>
     </Route>
   </Routes>

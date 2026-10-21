@@ -1,9 +1,9 @@
 package com.rajesh.controller;
 
-import com.rajesh.dto.Auth.RegisterRequest;
-import com.rajesh.dto.Auth.RegisterResponse;
-import com.rajesh.dto.Login.LoginRequest;
-import com.rajesh.dto.Login.LoginResponse;
+import com.rajesh.dto.Auth.register.RegisterRequest;
+import com.rajesh.dto.Auth.register.RegisterResponse;
+import com.rajesh.dto.Auth.Login.LoginRequest;
+import com.rajesh.dto.Auth.Login.LoginResponse;
 import com.rajesh.service.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

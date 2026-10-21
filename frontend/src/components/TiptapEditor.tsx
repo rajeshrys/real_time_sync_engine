@@ -13,6 +13,7 @@ interface TipTapEditorProps {
   onChange: (content: object) => void;
   documentId: number;
   userId?: number;
+  editable: boolean;
 }
 
 const TiptapEditor = ({
@@ -20,6 +21,7 @@ const TiptapEditor = ({
   onChange,
   documentId,
   userId,
+  editable= true,
 }: TipTapEditorProps) => {
 
   // Used to identify changes coming from another user
@@ -31,7 +33,7 @@ const TiptapEditor = ({
     ],
 
     content: "<p>Start writing...</p>",
-
+    editable,
     editorProps: {
       attributes: {
         class: "focus:outline-none h-full p-4",
@@ -73,6 +75,7 @@ const TiptapEditor = ({
     editor.commands.setContent(content);
 
     isRemoteUpdate.current = false;
+
 
   }, [editor, content]);
 

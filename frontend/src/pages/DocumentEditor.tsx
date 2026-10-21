@@ -383,6 +383,7 @@ const DocumentEditor = () => {
               documentId={documentId!}
               userId={1}
               content={content}
+              editable={!isTrashed}
               onChange={(content) => {
                 setContent(content);
               }}
