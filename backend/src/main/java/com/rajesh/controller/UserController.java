@@ -4,6 +4,7 @@ import com.rajesh.dto.Auth.UserResponse;
 import com.rajesh.model.User;
 import com.rajesh.service.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;

@@ -33,6 +33,7 @@ const App = () => {
       <Route path="/dashboard/shared" element={<Dashboard view="shared" />} />
       <Route path="/dashboard/trash" element={<Dashboard view="trash" />} />
       <Route path="/documents/:id" element={<DocumentEditor />} />
+      <Route path="/documents/new" element={<DocumentEditor />}/>
     </Route>
     </Route>
   </Routes>

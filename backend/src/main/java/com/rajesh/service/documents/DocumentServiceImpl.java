@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -48,7 +49,18 @@ public class DocumentServiceImpl implements DocumentService{
     }
 
     public List<Document> getAllDocuments() {
-        return documentRepository.findAll();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Long ownerId = user.getId();
+
+        return documentRepository
+                .findByOwnerIdAndDeletedAtIsNull(ownerId);
     }
 
     public Document getDocumentById(Long id) {
@@ -64,6 +76,12 @@ public class DocumentServiceImpl implements DocumentService{
             UpdateDocumentRequest request
     ) {
         String contentJson;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new RuntimeException("user not found"));
+
+        Long ownerId = user.getId();
         try {
             contentJson = objectMapper.writeValueAsString(request.getContent());
         }catch (JsonParseException e ){
@@ -73,8 +91,9 @@ public class DocumentServiceImpl implements DocumentService{
                 throw new RuntimeException(ex);
             }
         }
-
-        Document document = getDocumentById(id);
+        Document document = documentRepository
+                .findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
 
         document.setTitle(request.getTitle());
         document.setContent(contentJson);
@@ -84,7 +103,87 @@ public class DocumentServiceImpl implements DocumentService{
 
     public void deleteDocument(Long id) {
 
-        Document document = getDocumentById(id);
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Long ownerId = user.getId();
+
+        Document document = documentRepository
+                .findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        document.setDeletedAt(LocalDateTime.now());
+
+        documentRepository.save(document);
+    }
+
+    @Override
+    public List<Document> getTrashDocuments() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Long ownerId = user.getId();
+
+        return documentRepository
+                .findByOwnerIdAndDeletedAtIsNotNull(ownerId);
+    }
+
+    @Override
+    public void restoreDocument(Long id) {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Long ownerId = user.getId();
+
+        Document document = documentRepository
+                .findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        if (document.getDeletedAt() == null) {
+            throw new RuntimeException("Document is not in trash");
+        }
+
+        document.setDeletedAt(null);
+
+        documentRepository.save(document);
+    }
+
+    @Override
+    public void permanentlyDeleteDocument(Long id) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Long ownerId = user.getId();
+
+        Document document = documentRepository
+                .findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        if (document.getDeletedAt() == null) {
+            throw new RuntimeException("Document is not in trash");
+        }
 
         documentRepository.delete(document);
     }

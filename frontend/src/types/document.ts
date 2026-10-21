@@ -5,6 +5,7 @@ export interface Document{
     ownderId: number;
     createdAt: string;
     updatedAt: string;
+    deletedAt: string | null;
 };
 
 export interface CreateDocumentRequest{

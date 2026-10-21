@@ -65,4 +65,28 @@ public class DocumentController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/trash")
+    public ResponseEntity<List<Document>> trashDocuments(){
+        return ResponseEntity.ok(
+                documentService.getTrashDocuments()
+        );
+    }
+
+    @PostMapping("/{id}/restore")
+    public ResponseEntity<Void> restoreDocument(@PathVariable Long id){
+        documentService.restoreDocument(id);
+        return  ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDeleteDocument(
+            @PathVariable Long id
+    ) {
+
+        documentService.permanentlyDeleteDocument(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }

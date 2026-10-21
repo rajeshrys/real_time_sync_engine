@@ -30,9 +30,12 @@ public class Document {
     @Column(nullable = false)
     private Long ownerId;
 
+//    Soft delete
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @PrePersist
     protected void onCreate(){
-        LocalDateTime createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
@@ -41,7 +44,5 @@ public class Document {
         updatedAt = LocalDateTime.now();
     }
 
-
-    @CreationTimestamp
     private LocalDateTime updatedAt;
 }

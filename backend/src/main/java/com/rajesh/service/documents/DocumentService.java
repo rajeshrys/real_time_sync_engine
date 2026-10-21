@@ -4,6 +4,7 @@ import com.rajesh.dto.Documents.CreateDocumentRequest;
 import com.rajesh.dto.Documents.UpdateDocumentRequest;
 import com.rajesh.model.Document;
 
+import javax.print.Doc;
 import java.util.List;
 
 public interface DocumentService {
@@ -17,4 +18,10 @@ public interface DocumentService {
     Document updateDocument(Long id, UpdateDocumentRequest request);
 
     void deleteDocument(Long id);
+
+    List<Document> getTrashDocuments();
+
+    void restoreDocument(Long id);
+
+    void permanentlyDeleteDocument(Long id);
 }
