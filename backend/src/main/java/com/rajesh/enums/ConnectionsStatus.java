@@ -1,6 +1,6 @@
 package com.rajesh.enums;
 
-public enum FriendRequestStatus {
+public enum ConnectionsStatus {
     PENDING,
     ACCEPTED,
     REJECTED
