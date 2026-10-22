@@ -14,6 +14,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DocumentEditor from "./pages/DocumentEditor";
 import Connections from "./pages/Connections";
 import ConnectionRequests from "./pages/ConnectionRequests";
+import ConnectionMembers from "./pages/ConnectionMembers";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
             <Route path="/documents/new" element={<DocumentEditor />} />
             <Route path="/dashboard/connections" element={<Connections />} />
             <Route path="/dashboard/connections/requests" element={<ConnectionRequests />} />
+            <Route path="/dashboard/connections/members" element={<ConnectionMembers />} />
           </Route>
         </Route>
       </Routes>

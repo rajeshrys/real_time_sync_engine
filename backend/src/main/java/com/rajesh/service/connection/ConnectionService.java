@@ -1,5 +1,6 @@
 package com.rajesh.service.connection;
 
+import com.rajesh.dto.connections.ConnectionMemberResponse;
 import com.rajesh.dto.connections.ConnectionRequestResponse;
 
 import java.util.List;
@@ -13,5 +14,7 @@ public interface ConnectionService {
     void acceptConnectRequest(String currentUserEmail,Long connectionId);
 
     void rejectConnectionRequest(String currentUserEmail, Long connectionId);
+
+    List<ConnectionMemberResponse> getConnections(String currentUserEmail);
 
 }

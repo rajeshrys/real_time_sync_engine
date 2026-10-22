@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, UserRound, X, Loader2, UserPlus, Users, Clock, Check } from "lucide-react";
 import { searchUsers, type UserSearchResult } from "../api/user";
-import { sendConnectRequest } from "../api/connection";
+import {type ConnectionMember, getConnections, sendConnectRequest } from "../api/connection";
 
 export default function Connections() {
   const [query, setQuery] = useState("");
@@ -10,6 +10,7 @@ export default function Connections() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [connectingUserId, setConnectingUserId] = useState<number | null>(null);
+  const [connections,setConnections ] = useState<ConnectionMember[]>([]);
 
   const searchRequestId = useRef(0);
 
@@ -78,6 +79,19 @@ export default function Connections() {
       setConnectingUserId(null);
     }
   };
+
+  useEffect(()=>{
+    const loadConnections = async ()=>{
+      try{
+        const data = await getConnections();
+        setConnections(data);
+      }
+      catch(error){
+        console.log("failed to load connections",error);
+      }
+    }
+    loadConnections();
+  },[])
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10 antialiased">

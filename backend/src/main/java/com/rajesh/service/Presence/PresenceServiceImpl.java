@@ -1,28 +1,29 @@
-package com.rajesh.service.Presence;
+package com.rajesh.service.presence;
 
+import com.rajesh.service.Presence.PresenceService;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 @Service
-public class PresenceServiceImpl implements PresenceService{
+public class PresenceServiceImpl implements PresenceService {
 
-    private final Set<Long> onlineUsers = ConcurrentHashMap.newKeySet();
+    private final Set<String> onlineUsers =
+            ConcurrentHashMap.newKeySet();
 
     @Override
-    public void userConnected(Long userId) {
-        onlineUsers.add(userId);
+    public void userConnected(String username) {
+        onlineUsers.add(username);
     }
 
     @Override
-    public void userDisconnected(Long userId) {
-        onlineUsers.remove(userId);
+    public void userDisconnected(String username) {
+        onlineUsers.remove(username);
     }
 
     @Override
-    public boolean isOnline(Long userId) {
-        return onlineUsers.contains(userId);
+    public boolean isOnline(String username) {
+        return onlineUsers.contains(username);
     }
 }

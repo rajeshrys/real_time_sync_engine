@@ -15,6 +15,19 @@ export interface Member{
     firstName: string;
     email: string;
 }
+export interface ConnectionMember {
+    id: number;
+    username: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    active: boolean;
+}
+
+export const getConnections = async():Promise<ConnectionMember[]> =>{
+    const response = await api.get<ConnectionMember[]>("/connections");
+    return response.data;
+}
 
 export const sendConnectRequest = async(userId: number):Promise<void> =>{
     await api.post(`/connections/request/${userId}`);

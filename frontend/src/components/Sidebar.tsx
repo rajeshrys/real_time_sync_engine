@@ -8,6 +8,7 @@ import {
   Trash2,
   Users,
   UserCheck,
+  User
 } from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth";
@@ -22,6 +23,7 @@ const navItems = [
   { to: "/dashboard/trash", label: "Trash", icon: Trash2, end: false },
   { to: "/dashboard/connections", label: "Find People", icon: Users, end: false },
   { to: "/dashboard/connections/requests", label: "Requests", icon: UserCheck, end: false },
+  {to: "/dashboard/connections/members" ,label: "Members" ,icon: User, end:false}
 ];
 
 const itemClass = ({ isActive }: { isActive: boolean }) =>

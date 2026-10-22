@@ -1,5 +1,6 @@
 package com.rajesh.controller;
 
+import com.rajesh.dto.connections.ConnectionMemberResponse;
 import com.rajesh.dto.connections.ConnectionRequestResponse;
 import com.rajesh.model.Connection;
 import com.rajesh.service.connection.ConnectionService;
@@ -63,6 +64,11 @@ public class ConnectionController {
         return ResponseEntity.ok(
                 "Connection request rejected"
         );
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ConnectionMemberResponse>> getConnections(Authentication authentication){
+        return ResponseEntity.ok(connectionService.getConnections(authentication.getName()));
     }
 
 }
