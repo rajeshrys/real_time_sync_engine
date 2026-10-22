@@ -7,6 +7,7 @@ export interface UserSearchResult{
     firstName: string;
     lastName: string;
     email: string;
+    connectionStatus: "PENDING" | "ACCEPTED" | "REJECT" | null;
 }
 
 export const searchUsers= async( query : string):Promise<UserSearchResult[]> =>{

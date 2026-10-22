@@ -1,6 +1,7 @@
 package com.rajesh.repository;
 
 
+import com.rajesh.model.Connection;
 import com.rajesh.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

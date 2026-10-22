@@ -58,6 +58,7 @@ public class ConnectionServiceImpl implements ConnectionService{
                 .receiver(receiver)
                 .status(ConnectionsStatus.PENDING)
                 .build();
+        connectionRepository.save(connection);
     }
 
     @Override
@@ -67,6 +68,7 @@ public class ConnectionServiceImpl implements ConnectionService{
                         new RuntimeException("current user not found")
                 );
         List<Connection> connections = connectionRepository.findByReceiverAndStatus(currentUser,ConnectionsStatus.PENDING);
+        System.out.print(connections);
 
         return connections.stream()
                 .map(connection ->

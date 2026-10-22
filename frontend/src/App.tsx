@@ -1,6 +1,5 @@
 import {
   BrowserRouter,
-  Navigate,
   Route,
   Routes,
 } from "react-router-dom";
@@ -14,6 +13,7 @@ import AppLayout from "./pages/Applayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DocumentEditor from "./pages/DocumentEditor";
 import Connections from "./pages/Connections";
+import ConnectionRequests from "./pages/ConnectionRequests";
 
 const App = () => {
   return (
@@ -21,25 +21,23 @@ const App = () => {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
-
         <Route path="/login" element={<Login />} />
-
         <Route path="/register" element={<Register />} />
 
-        
-    {/* Authenticated: wrap in <Route element={<ProtectedRoute />}> ... </Route> */}
-    <Route element={<ProtectedRoute />}>
-    <Route element={<AppLayout />}>
-      <Route path="/dashboard" element={<Dashboard view="mine" />} />
-      <Route path="/dashboard/shared" element={<Dashboard view="shared" />} />
-      <Route path="/dashboard/trash" element={<Dashboard view="trash" />} />
-      <Route path="/documents/:id" element={<DocumentEditor />} />
-      <Route path="/documents/new" element={<DocumentEditor />}/>
-      <Route path="/dashboard/connections" element={<Connections />}/>
-    </Route>
-    </Route>
-  </Routes>
-  </BrowserRouter>
+        {/* Authenticated routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
+            <Route path="/dashboard" element={<Dashboard view="mine" />} />
+            <Route path="/dashboard/shared" element={<Dashboard view="shared" />} />
+            <Route path="/dashboard/trash" element={<Dashboard view="trash" />} />
+            <Route path="/documents/:id" element={<DocumentEditor />} />
+            <Route path="/documents/new" element={<DocumentEditor />} />
+            <Route path="/dashboard/connections" element={<Connections />} />
+            <Route path="/dashboard/connections/requests" element={<ConnectionRequests />} />
+          </Route>
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 };
 

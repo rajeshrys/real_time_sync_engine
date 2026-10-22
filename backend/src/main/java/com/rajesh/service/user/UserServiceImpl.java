@@ -3,17 +3,19 @@ package com.rajesh.service.user;
 import com.rajesh.Exception.UserNotFoundException;
 import com.rajesh.dto.Auth.UserResponse;
 import com.rajesh.dto.UserSearchResponse;
+import com.rajesh.enums.ConnectionsStatus;
+import com.rajesh.model.Connection;
 import com.rajesh.model.User;
+import com.rajesh.repository.ConnectionRepository;
 import com.rajesh.repository.UserRepository;
 import com.rajesh.service.Presence.PresenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import javax.management.RuntimeMBeanException;
+import javax.swing.text.html.Option;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PresenceService presenceService;
+    private final ConnectionRepository connectionRepository;
 
 
     @Override
@@ -96,6 +98,9 @@ public class UserServiceImpl implements UserService {
             String query,
             String currentUserEmail
     ) {
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(()->new RuntimeException("current user not found"));
+
 
         List<User> users = userRepository.searchUsers(
                 query,
@@ -103,14 +108,25 @@ public class UserServiceImpl implements UserService {
         );
 
         return users.stream()
-                .map(user -> UserSearchResponse.builder()
-                        .id(user.getId())
-                        .username(user.getUsername())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .email(user.getEmail())
-                        .build())
-                .toList();
+                .map(user->{
+                    ConnectionsStatus connectionsStatus = null;
+                    Optional< Connection> outgoing = connectionRepository.findByRequesterAndReceiver(currentUser,user);
+                    Optional<Connection> incoming = connectionRepository.findByRequesterAndReceiver(user,currentUser);
+                    if(outgoing.isPresent()){
+                        connectionsStatus = outgoing.get().getStatus();
+                    }
+                    else if(incoming.isPresent()){
+                        connectionsStatus= incoming.get().getStatus();
+                    }
+                    return UserSearchResponse.builder()
+                            .id(user.getId())
+                            .username(user.getUsername())
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .email(user.getEmail())
+                            .connectionStatus(connectionsStatus)
+                            .build();
+                }).toList();
     }
 
 }

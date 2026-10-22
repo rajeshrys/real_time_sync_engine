@@ -1,5 +1,6 @@
 package com.rajesh.dto.connections;
 
+import com.rajesh.enums.ConnectionsStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +18,4 @@ public class ConnectionRequestResponse {
     private String firstName;
     private String lastName;
     private String email;
-
 }

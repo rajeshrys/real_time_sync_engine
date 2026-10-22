@@ -6,6 +6,9 @@ import {
   Trash2,
   Users,
   RotateCcw,
+  Check,
+  AlertCircle,
+  Save,
 } from "lucide-react";
 
 import TiptapEditor from "../components/TiptapEditor";
@@ -15,6 +18,7 @@ import {
   restoreDocument,
   permanentlyDeleteDocument,
 } from "../api/documentApi";
+import ThemeToggle from "../components/ThemeToggle";
 
 type Status = {
   type: "success" | "error";
@@ -55,7 +59,6 @@ const DocumentEditor = () => {
         setContent(parsedContent);
       } catch (error) {
         console.error("Failed to load document:", error);
-
         setStatus({
           type: "error",
           message: "Could not load this document.",
@@ -74,7 +77,7 @@ const DocumentEditor = () => {
 
     const timer = setTimeout(() => {
       setStatus(null);
-    }, 3000);
+    }, 3500);
 
     return () => clearTimeout(timer);
   }, [status]);
@@ -92,7 +95,7 @@ const DocumentEditor = () => {
     if (!title.trim()) {
       setStatus({
         type: "error",
-        message: "Add a title before saving.",
+        message: "Please add a title before saving.",
       });
       return;
     }
@@ -107,15 +110,14 @@ const DocumentEditor = () => {
         });
 
         const newDocumentId = response.data.id;
-
         setDocumentId(newDocumentId);
 
         setStatus({
           type: "success",
-          message: "Document created.",
+          message: "Document created successfully.",
         });
 
-        navigate("/dashboard");
+        navigate(`/documents/${newDocumentId}`, { replace: true });
       } else {
         await api.put(`/documents/${documentId}`, {
           title,
@@ -124,12 +126,11 @@ const DocumentEditor = () => {
 
         setStatus({
           type: "success",
-          message: "Changes saved.",
+          message: "All changes saved.",
         });
       }
     } catch (error) {
       console.error("Error saving document:", error);
-
       setStatus({
         type: "error",
         message: "Could not save the document.",
@@ -144,25 +145,20 @@ const DocumentEditor = () => {
     if (documentId === null) return;
 
     const confirmed = window.confirm(
-      "Are you sure you want to delete this document?"
+      "Are you sure you want to move this document to trash?"
     );
-
     if (!confirmed) return;
 
     try {
       setDeleting(true);
-
       await api.delete(`/documents/${documentId}`);
-
       navigate("/dashboard/trash");
     } catch (error) {
       console.error("Error deleting document:", error);
-
       setStatus({
         type: "error",
         message: "Could not delete the document.",
       });
-
       setDeleting(false);
     }
   };
@@ -173,18 +169,19 @@ const DocumentEditor = () => {
 
     try {
       setDeleting(true);
-
       await restoreDocument(documentId);
-
-      navigate("/dashboard");
+      setIsTrashed(false);
+      setStatus({
+        type: "success",
+        message: "Document restored.",
+      });
     } catch (error) {
       console.error("Failed to restore document:", error);
-
       setStatus({
         type: "error",
         message: "Could not restore the document.",
       });
-
+    } finally {
       setDeleting(false);
     }
   };
@@ -196,23 +193,18 @@ const DocumentEditor = () => {
     const confirmed = window.confirm(
       "This will permanently delete the document. This action cannot be undone."
     );
-
     if (!confirmed) return;
 
     try {
       setDeleting(true);
-
       await permanentlyDeleteDocument(documentId);
-
       navigate("/dashboard/trash");
     } catch (error) {
       console.error("Error permanently deleting document:", error);
-
       setStatus({
         type: "error",
         message: "Could not permanently delete the document.",
       });
-
       setDeleting(false);
     }
   };
@@ -220,176 +212,164 @@ const DocumentEditor = () => {
   /* Collaboration */
   const handleCollaborate = () => {
     if (documentId === null) return;
-
-    console.log(
-      "Collaboration enabled for document:",
-      documentId
-    );
+    setStatus({
+      type: "success",
+      message: "Real-time sync is active for this document.",
+    });
   };
 
   const isNew = documentId === null;
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-gray-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-6 py-3">
-          {/* Back button */}
-          <button
-            onClick={() => navigate("/dashboard")}
-            aria-label="Back to dashboard"
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-
-          {/* Title */}
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={isTrashed}
-            type="text"
-            placeholder="Untitled document"
-            aria-label="Document title"
-            className="min-w-0 flex-1 basis-48 rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-lg font-semibold text-gray-900 outline-none transition placeholder:text-gray-400 hover:border-gray-200 focus:border-gray-300 disabled:cursor-not-allowed disabled:opacity-60"
-          />
-
-          {/* Header actions */}
-          <div className="flex items-center gap-2">
-            {/* Status */}
-            {status && (
-              <span
-                role="status"
-                className={`mr-1 hidden text-sm sm:inline ${
-                  status.type === "error"
-                    ? "text-red-600"
-                    : "text-gray-500"
-                }`}
-              >
-                {status.message}
-              </span>
-            )}
-
-            {/* Collaborate */}
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
+      {/* Sticky Top Header */}
+      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/80 px-6 py-3 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/80">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            {/* Back button */}
             <button
-              onClick={handleCollaborate}
-              disabled={isNew || isTrashed}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3.5 py-2 text-sm font-medium text-gray-800 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              onClick={() => navigate("/dashboard")}
+              aria-label="Back to dashboard"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-xs transition hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
-              <Users className="h-4 w-4" />
-
-              <span className="hidden sm:inline">
-                Collaborate
-              </span>
+              <ArrowLeft className="h-4 w-4" />
             </button>
 
-            {/* Active document actions */}
+            {/* Title Input */}
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              disabled={isTrashed}
+              type="text"
+              placeholder="Untitled document"
+              aria-label="Document title"
+              className="min-w-0 flex-1 rounded-xl border border-transparent bg-transparent px-2.5 py-1 text-lg font-semibold tracking-tight text-slate-900 placeholder-slate-400 outline-none transition hover:border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-100 dark:placeholder-slate-500 dark:hover:border-slate-700 dark:focus:border-blue-400"
+            />
+          </div>
+
+          {/* Actions & Status */}
+          <div className="flex items-center gap-2">
+            {/* Toast status message */}
+            {status && (
+              <div
+                role="status"
+                className={`hidden items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium sm:inline-flex ${
+                  status.type === "error"
+                    ? "bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400"
+                    : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+                }`}
+              >
+                {status.type === "error" ? (
+                  <AlertCircle className="h-3.5 w-3.5" />
+                ) : (
+                  <Check className="h-3.5 w-3.5" />
+                )}
+                <span>{status.message}</span>
+              </div>
+            )}
+
+            {/* Collaborate indicator */}
+            {!isTrashed && (
+              <button
+                onClick={handleCollaborate}
+                disabled={isNew}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                <Users className="h-3.5 w-3.5 text-blue-500" />
+                <span className="hidden sm:inline">Collaborate</span>
+              </button>
+            )}
+
+            {/* Trash Actions */}
             {!isTrashed ? (
               <button
                 onClick={handleDelete}
                 disabled={isNew || deleting}
                 aria-label="Delete document"
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3.5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 shadow-xs transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-800 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-red-950/40"
               >
                 {deleting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 )}
-
-                <span className="hidden sm:inline">
-                  Delete
-                </span>
+                <span className="hidden sm:inline">Trash</span>
               </button>
             ) : (
               <>
-                {/* Restore */}
                 <button
                   onClick={handleRestore}
                   disabled={deleting}
-                  className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3.5 py-2 text-sm font-medium text-gray-800 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200"
                 >
-                  <RotateCcw className="h-4 w-4" />
-
-                  <span className="hidden sm:inline">
-                    Restore
-                  </span>
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Restore</span>
                 </button>
 
-                {/* Permanent delete */}
                 <button
                   onClick={handlePermanentDelete}
                   disabled={deleting}
-                  aria-label="Delete permanently"
-                  className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3.5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400"
                 >
-                  {deleting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-
-                  <span className="hidden sm:inline">
-                    Delete permanently
-                  </span>
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Delete permanently</span>
                 </button>
               </>
             )}
 
-            {/* Save */}
-            <button
-              onClick={handleSave}
-              disabled={saving || loading || isTrashed}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
-            >
-              {saving && (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              )}
+            {/* Save Button */}
+            {!isTrashed && (
+              <button
+                onClick={handleSave}
+                disabled={saving || loading}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white shadow-sm shadow-blue-500/20 transition hover:bg-blue-500 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Save className="h-3.5 w-3.5" />
+                )}
+                <span>{saving ? "Saving..." : isNew ? "Save" : "Save changes"}</span>
+              </button>
+            )}
 
-              {saving
-                ? "Saving..."
-                : isNew
-                  ? "Save"
-                  : "Save changes"}
-            </button>
+            <ThemeToggle className="ml-1" />
           </div>
         </div>
 
-        {/* Status on small screens */}
+        {/* Small Screen Status Notice */}
         {status && (
-          <p
+          <div
             role="status"
-            className={`px-6 pb-2 text-sm sm:hidden ${
+            className={`mt-2 rounded-lg px-3 py-1.5 text-xs font-medium sm:hidden ${
               status.type === "error"
-                ? "text-red-600"
-                : "text-gray-500"
+                ? "bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400"
+                : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
             }`}
           >
             {status.message}
-          </p>
+          </div>
         )}
       </header>
 
-      {/* Editor */}
-      <main className="mx-auto max-w-4xl px-6 py-8">
-        <div className="min-h-[60vh] rounded-xl border border-gray-200 bg-white p-6 text-gray-900 sm:p-10">
-          {loading ? (
-            <div className="flex items-center justify-center gap-2 py-24 text-sm text-gray-500">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading document...
-            </div>
-          ) : (
-            <TiptapEditor
-              documentId={documentId!}
-              userId={1}
-              content={content}
-              editable={!isTrashed}
-              onChange={(content) => {
-                setContent(content);
-              }}
-            />
-          )}
-        </div>
+      {/* Editor Main Canvas */}
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+        {loading ? (
+          <div className="flex min-h-[400px] flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-12 text-slate-500 dark:border-slate-800/80 dark:bg-slate-900 dark:text-slate-400">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600 dark:text-blue-400" />
+            <p className="text-sm font-medium">Loading document...</p>
+          </div>
+        ) : (
+          <TiptapEditor
+            documentId={documentId!}
+            userId={1}
+            content={content}
+            editable={!isTrashed}
+            onChange={(content) => {
+              setContent(content);
+            }}
+          />
+        )}
       </main>
     </div>
   );
