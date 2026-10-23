@@ -31,4 +31,30 @@ public interface ConnectionRepository extends JpaRepository<Connection,Long> {
             @Param("user") User user,
             @Param("status") ConnectionsStatus status
     );
+
+    @Query("""
+        SELECT c
+        FROM Connection c
+        WHERE c.status = :status
+        AND (
+            c.requester = :user
+            OR c.receiver = :user
+        )
+    """)
+    List<Connection> findAndAcceptConnections(@Param("User") User user,@Param("Status") ConnectionsStatus status);
+
+    @Query("""
+        SELECT c
+        FROM Connection c
+        WHERE c.status = com.rajesh.enums.ConnectionsStatus.ACCEPTED
+        AND (
+            (c.requester = :userA AND c.receiver = :userB)
+            OR
+            (c.requester = :userB AND c.receiver = :userA)
+        )
+    """)
+    Optional<Connection> findAcceptedConnection(
+            @Param("userA") User userA,
+            @Param("userB") User userB
+    );
 }
