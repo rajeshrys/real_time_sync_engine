@@ -1,10 +1,14 @@
 package com.rajesh.service.Presence;
 
+import java.util.Set;
+
 public interface PresenceService {
 
-    void userConnected(String username);
+    boolean userConnected(String username ,String sessionId);
 
-    void userDisconnected(String username);
+    boolean userDisconnected(String username ,String sessionId);
 
     boolean isOnline(String username);
+
+    Set<String> getOnlineUsers();
 }

@@ -21,6 +21,7 @@ import {
   restoreDocument,
 } from "../api/documentApi";
 import { type DocumentResponse } from "../types/document";
+import { connectPresence,disconnectedPresence } from "../api/presence"; 
 
 type View = "mine" | "shared" | "trash";
 
@@ -92,6 +93,7 @@ const Dashboard = ({ view = "mine" }: { view?: View }) => {
       console.error("Failed to restore document:", error);
     }
   };
+
 
   useEffect(() => {
     const fetchDocuments = async () => {

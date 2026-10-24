@@ -30,7 +30,10 @@ public class Appconfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(
                                 "/api/auth/register",
-                                        "/api/auth/login")
+                                "/api/auth/login",
+                                "/ws",
+                                        "/presence/**",
+                                "/ws/**")
                                 .permitAll()
                                 .anyRequest().authenticated()
                 ).addFilterBefore(

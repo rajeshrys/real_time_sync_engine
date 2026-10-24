@@ -52,6 +52,7 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
   const handleLogout = async () => {
     await logout?.();
     navigate("/login", { replace: true });
+    localStorage.removeItem("token")
   };
 
   useEffect(() => {

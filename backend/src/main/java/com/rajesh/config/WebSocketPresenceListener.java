@@ -1,50 +1,70 @@
 package com.rajesh.config;
 
-import com.rajesh.service.Presence.PresenceService;
-import lombok.RequiredArgsConstructor;
+import com.rajesh.service.PresenceService;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+import java.security.Principal;
+
 @Component
-@RequiredArgsConstructor
 public class WebSocketPresenceListener {
 
     private final PresenceService presenceService;
 
-    @EventListener
-    public void handleWebSocketConnect(
-            SessionConnectedEvent event
-    ) {
-
-        StompHeaderAccessor accessor =
-                StompHeaderAccessor.wrap(event.getMessage());
-
-        if (accessor.getUser() != null) {
-
-            String username =
-                    accessor.getUser().getName();
-
-            presenceService.userConnected(username);
-        }
+    public WebSocketPresenceListener(PresenceService presenceService) {
+        this.presenceService = presenceService;
     }
 
     @EventListener
-    public void handleWebSocketDisconnect(
-            SessionDisconnectEvent event
-    ) {
+    public void handleWebSocketConnect(SessionConnectedEvent event) {
 
         StompHeaderAccessor accessor =
                 StompHeaderAccessor.wrap(event.getMessage());
 
-        if (accessor.getUser() != null) {
+        Principal principal = accessor.getUser();
 
-            String username =
-                    accessor.getUser().getName();
+        System.out.println("=================================");
+        System.out.println("🔥 WebSocket CONNECTED");
+        System.out.println("Session ID: " + accessor.getSessionId());
+        System.out.println("Principal: " + principal);
+        System.out.println("=================================");
 
-            presenceService.userDisconnected(username);
+        if (principal == null) {
+            System.out.println("❌ No authenticated WebSocket user");
+            return;
         }
+
+        String email = principal.getName();
+        String sessionId = accessor.getSessionId();
+
+        presenceService.connect(email, sessionId);
+    }
+
+    @EventListener
+    public void handleWebSocketDisconnect(SessionDisconnectEvent event) {
+
+        StompHeaderAccessor accessor =
+                StompHeaderAccessor.wrap(event.getMessage());
+
+        Principal principal = accessor.getUser();
+
+        System.out.println("=================================");
+        System.out.println("🔥 WebSocket DISCONNECTED");
+        System.out.println("Session ID: " + accessor.getSessionId());
+        System.out.println("Principal: " + principal);
+        System.out.println("=================================");
+
+        if (principal == null) {
+            System.out.println("❌ No authenticated WebSocket user");
+            return;
+        }
+
+        String email = principal.getName();
+        String sessionId = accessor.getSessionId();
+
+        presenceService.disconnect(email, sessionId);
     }
 }

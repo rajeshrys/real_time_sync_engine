@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
     Users,
     UserCircle,
@@ -12,50 +13,199 @@ import {
     type ConnectionMember,
 } from "../api/connection";
 
+import {
+    subscribeToPresence,
+    onPresenceConnected,
+} from "../services/presenceWebsocket";
+
+
 const ConnectionMembers = () => {
 
-    const [connections, setConnections] = useState<ConnectionMember[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [onlineIds, setOnlineIds] =
+        useState<Set<number>>(new Set());
+
+    const [connections, setConnections] =
+        useState<ConnectionMember[]>([]);
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [error, setError] =
+        useState<string | null>(null);
+
+
+    // --------------------------------
+    // LOAD CONNECTIONS + PRESENCE
+    // --------------------------------
 
     useEffect(() => {
 
-        const loadConnections = async () => {
+        let mounted = true;
+
+
+        // --------------------------------
+        // LOAD CONNECTIONS
+        // --------------------------------
+
+        const loadConnections = async (
+            silent = false
+        ) => {
 
             try {
 
-                setLoading(true);
+                if (!silent) {
+                    setLoading(true);
+                }
+
                 setError(null);
 
-                const data = await getConnections();
+                const data =
+                    await getConnections();
+
+                if (!mounted) {
+                    return;
+                }
 
                 setConnections(data);
 
-            } catch (error) {
+                /*
+                 * Initial presence state comes from
+                 * the backend connection response.
+                 *
+                 * WebSocket events will update this
+                 * immediately afterward.
+                 */
+                setOnlineIds(
+                    new Set(
+                        data
+                            .filter(
+                                (connection) =>
+                                    connection.active
+                            )
+                            .map(
+                                (connection) =>
+                                    connection.id
+                            )
+                    )
+                );
+
+            } catch (err) {
 
                 console.error(
                     "Failed to load connections:",
-                    error
+                    err
                 );
 
-                setError(
-                    "Failed to load your connections."
-                );
+                if (mounted) {
+                    setError(
+                        "Failed to load your connections."
+                    );
+                }
 
             } finally {
 
-                setLoading(false);
+                if (
+                    mounted &&
+                    !silent
+                ) {
+                    setLoading(false);
+                }
+
             }
         };
 
+
+        // --------------------------------
+        // INITIAL LOAD
+        // --------------------------------
+
         loadConnections();
+
+
+        // --------------------------------
+        // PRESENCE EVENTS
+        // --------------------------------
+
+        const unsubPresence =
+            subscribeToPresence((event) => {
+
+                if (!mounted) {
+                    return;
+                }
+
+                console.log(
+                    "📡 ConnectionMembers presence:",
+                    event
+                );
+
+                setOnlineIds((previous) => {
+
+                    const next =
+                        new Set(previous);
+
+                    if (
+                        event.status === "ONLINE"
+                    ) {
+
+                        next.add(event.userId);
+
+                    } else if (
+                        event.status === "OFFLINE"
+                    ) {
+
+                        next.delete(event.userId);
+
+                    }
+
+                    return next;
+                });
+
+            });
+
+
+        // --------------------------------
+        // PRESENCE RECONNECTED
+        // --------------------------------
+
+        /*
+         * If the WebSocket reconnects, we may have
+         * missed presence events while disconnected.
+         *
+         * Reloading the connections gives us a
+         * fresh presence snapshot.
+         */
+        const unsubConnect =
+            onPresenceConnected(() => {
+
+                console.log(
+                    "🔄 Presence reconnected — refreshing connections"
+                );
+
+                loadConnections(true);
+
+            });
+
+
+        // --------------------------------
+        // CLEANUP
+        // --------------------------------
+
+        return () => {
+
+            mounted = false;
+
+            unsubPresence();
+            unsubConnect();
+
+        };
 
     }, []);
 
 
-    /*
-     * Loading state
-     */
+    // --------------------------------
+    // LOADING
+    // --------------------------------
+
     if (loading) {
 
         return (
@@ -79,9 +229,10 @@ const ConnectionMembers = () => {
     }
 
 
-    /*
-     * Error state
-     */
+    // --------------------------------
+    // ERROR
+    // --------------------------------
+
     if (error) {
 
         return (
@@ -98,13 +249,15 @@ const ConnectionMembers = () => {
     }
 
 
+    // --------------------------------
+    // UI
+    // --------------------------------
+
     return (
 
         <div className="mx-auto w-full max-w-5xl p-6">
 
-            {/* -------------------------------- */}
             {/* HEADER */}
-            {/* -------------------------------- */}
 
             <div className="mb-6">
 
@@ -137,9 +290,7 @@ const ConnectionMembers = () => {
             </div>
 
 
-            {/* -------------------------------- */}
             {/* EMPTY STATE */}
-            {/* -------------------------------- */}
 
             {connections.length === 0 ? (
 
@@ -168,107 +319,126 @@ const ConnectionMembers = () => {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
-                    {connections.map((user) => (
+                    {connections.map((user) => {
 
-                        <div
-                            key={user.id}
-                            className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
-                        >
+                        /*
+                         * IMPORTANT:
+                         *
+                         * Do not use user.active here.
+                         *
+                         * onlineIds is the live WebSocket
+                         * presence state.
+                         */
+                        const isOnline =
+                            onlineIds.has(user.id);
 
-                            {/* USER INFORMATION */}
 
-                            <div className="flex items-center gap-3">
+                        return (
 
-                                {/* AVATAR */}
+                            <div
+                                key={user.id}
+                                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+                            >
 
-                                <div className="relative">
+                                {/* USER INFORMATION */}
 
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-semibold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                                <div className="flex items-center gap-3">
 
-                                        {user.firstName
-                                            ?.charAt(0)
-                                            .toUpperCase()
-                                        }
+                                    {/* AVATAR */}
+
+                                    <div className="relative">
+
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-semibold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+
+                                            {user.firstName
+                                                ?.charAt(0)
+                                                .toUpperCase()}
+
+                                        </div>
+
+
+                                        {/* ONLINE DOT */}
+
+                                        {isOnline && (
+
+                                            <span
+                                                className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500 dark:border-gray-900"
+                                            />
+
+                                        )}
 
                                     </div>
 
 
-                                    {/* ONLINE INDICATOR */}
+                                    {/* NAME */}
 
-                                    {user.active && (
+                                    <div>
 
-                                        <span
-                                            className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500 dark:border-gray-900"
-                                        />
+                                        <p className="font-medium text-gray-900 dark:text-white">
+
+                                            {user.firstName}{" "}
+
+                                            {user.lastName}
+
+                                        </p>
+
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+
+                                            @{user.username}
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                {/* STATUS */}
+
+                                <div className="flex items-center gap-2">
+
+                                    {isOnline ? (
+
+                                        <>
+
+                                            <Wifi
+                                                size={15}
+                                                className="text-green-500"
+                                            />
+
+                                            <span className="text-sm font-medium text-green-600 dark:text-green-400">
+
+                                                Active
+
+                                            </span>
+
+                                        </>
+
+                                    ) : (
+
+                                        <>
+
+                                            <WifiOff
+                                                size={15}
+                                                className="text-gray-400"
+                                            />
+
+                                            <span className="text-sm text-gray-500 dark:text-gray-400">
+
+                                                Offline
+
+                                            </span>
+
+                                        </>
 
                                     )}
 
                                 </div>
 
-
-                                {/* NAME + USERNAME */}
-
-                                <div>
-
-                                    <p className="font-medium text-gray-900 dark:text-white">
-
-                                        {user.firstName}{" "}
-                                        {user.lastName}
-
-                                    </p>
-
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">
-
-                                        @{user.username}
-
-                                    </p>
-
-                                </div>
-
                             </div>
 
-
-                            {/* STATUS */}
-
-                            <div className="flex items-center gap-2">
-
-                                {user.active ? (
-
-                                    <>
-                                        <Wifi
-                                            size={15}
-                                            className="text-green-500"
-                                        />
-
-                                        <span className="text-sm font-medium text-green-600 dark:text-green-400">
-
-                                            Active
-
-                                        </span>
-                                    </>
-
-                                ) : (
-
-                                    <>
-                                        <WifiOff
-                                            size={15}
-                                            className="text-gray-400"
-                                        />
-
-                                        <span className="text-sm text-gray-500 dark:text-gray-400">
-
-                                            Offline
-
-                                        </span>
-                                    </>
-
-                                )}
-
-                            </div>
-
-                        </div>
-
-                    ))}
+                        );
+                    })}
 
                 </div>
 
@@ -277,5 +447,6 @@ const ConnectionMembers = () => {
         </div>
     );
 };
+
 
 export default ConnectionMembers;

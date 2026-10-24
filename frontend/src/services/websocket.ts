@@ -6,12 +6,15 @@ export const connectToDocument = (
   documentId: number,
   onMessage: (message: any) => void
 ) => {
+  const token = localStorage.getItem("accessToken");
 
   client = new Client({
 
     brokerURL: "ws://localhost:3000/ws",
 
     reconnectDelay: 5000,
+
+    connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
 
     onConnect: () => {
 
