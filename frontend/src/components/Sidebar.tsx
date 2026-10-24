@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { getDocuments } from "../api/documentApi";
 import { type DocumentResponse } from "../types/document";
 import ThemeToggle from "./ThemeToggle";
+import { stopPresence } from "../services/presenceWebsocket";
 
 const navItems = [
   { to: "/dashboard", label: "My documents", icon: FileText, end: true },
@@ -50,9 +51,10 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
   const initial = user?.firstName?.charAt(0)?.toUpperCase() ?? "U";
 
   const handleLogout = async () => {
+    await stopPresence();
     await logout?.();
     navigate("/login", { replace: true });
-    localStorage.removeItem("token")
+    localStorage.removeItem("accessToken");
   };
 
   useEffect(() => {

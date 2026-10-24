@@ -83,7 +83,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     await registerApi(data);
   };
 
-  const logout = () => {
+  const logout = async () => {
+
     localStorage.removeItem("accessToken");
     setUser(null);
   };

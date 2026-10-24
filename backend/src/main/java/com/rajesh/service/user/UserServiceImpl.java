@@ -8,13 +8,10 @@ import com.rajesh.model.Connection;
 import com.rajesh.model.User;
 import com.rajesh.repository.ConnectionRepository;
 import com.rajesh.repository.UserRepository;
-import com.rajesh.service.Presence.PresenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.management.RuntimeMBeanException;
-import javax.swing.text.html.Option;
 import java.util.*;
 
 @Service

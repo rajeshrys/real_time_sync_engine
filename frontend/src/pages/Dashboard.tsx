@@ -21,7 +21,7 @@ import {
   restoreDocument,
 } from "../api/documentApi";
 import { type DocumentResponse } from "../types/document";
-import { connectPresence,disconnectedPresence } from "../api/presence"; 
+ 
 
 type View = "mine" | "shared" | "trash";
 

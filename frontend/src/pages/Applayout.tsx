@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { FileText, PanelLeft } from "lucide-react";
 
 import Sidebar from "../components/Sidebar";
 import ThemeToggle from "../components/ThemeToggle";
+
+import { startPresence } from "../services/presenceWebsocket";
 
 /**
  * Layout for all authenticated pages: fixed sidebar on the left,
@@ -11,6 +13,10 @@ import ThemeToggle from "../components/ThemeToggle";
  */
 const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    startPresence();
+}, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900 antialiased transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">

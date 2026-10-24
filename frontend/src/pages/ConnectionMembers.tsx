@@ -317,130 +317,76 @@ const ConnectionMembers = () => {
 
             ) : (
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    {connections.map((user) => {
+        const isOnline = onlineIds.has(user.id);
 
-                    {connections.map((user) => {
+        return (
+            <div
+                key={user.id}
+                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+            >
+                {/* User information */}
+                <div className="flex items-center gap-3">
 
-                        /*
-                         * IMPORTANT:
-                         *
-                         * Do not use user.active here.
-                         *
-                         * onlineIds is the live WebSocket
-                         * presence state.
-                         */
-                        const isOnline =
-                            onlineIds.has(user.id);
+                    {/* Avatar */}
+                    <div className="relative">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-semibold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                            {user.firstName
+                                ?.charAt(0)
+                                .toUpperCase()}
+                        </div>
 
+                        {/* Online dot */}
+                        {isOnline && (
+                            <span
+                                className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500 dark:border-gray-900"
+                            />
+                        )}
+                    </div>
 
-                        return (
+                    {/* Name */}
+                    <div>
+                        <p className="font-medium text-gray-900 dark:text-white">
+                            {user.firstName} {user.lastName}
+                        </p>
 
-                            <div
-                                key={user.id}
-                                className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
-                            >
-
-                                {/* USER INFORMATION */}
-
-                                <div className="flex items-center gap-3">
-
-                                    {/* AVATAR */}
-
-                                    <div className="relative">
-
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-semibold text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
-
-                                            {user.firstName
-                                                ?.charAt(0)
-                                                .toUpperCase()}
-
-                                        </div>
-
-
-                                        {/* ONLINE DOT */}
-
-                                        {isOnline && (
-
-                                            <span
-                                                className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500 dark:border-gray-900"
-                                            />
-
-                                        )}
-
-                                    </div>
-
-
-                                    {/* NAME */}
-
-                                    <div>
-
-                                        <p className="font-medium text-gray-900 dark:text-white">
-
-                                            {user.firstName}{" "}
-
-                                            {user.lastName}
-
-                                        </p>
-
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-
-                                            @{user.username}
-
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                {/* STATUS */}
-
-                                <div className="flex items-center gap-2">
-
-                                    {isOnline ? (
-
-                                        <>
-
-                                            <Wifi
-                                                size={15}
-                                                className="text-green-500"
-                                            />
-
-                                            <span className="text-sm font-medium text-green-600 dark:text-green-400">
-
-                                                Active
-
-                                            </span>
-
-                                        </>
-
-                                    ) : (
-
-                                        <>
-
-                                            <WifiOff
-                                                size={15}
-                                                className="text-gray-400"
-                                            />
-
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">
-
-                                                Offline
-
-                                            </span>
-
-                                        </>
-
-                                    )}
-
-                                </div>
-
-                            </div>
-
-                        );
-                    })}
-
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            @{user.username}
+                        </p>
+                    </div>
                 </div>
+
+                {/* Status */}
+                <div className="flex items-center gap-2">
+                    {isOnline ? (
+                        <>
+                            <Wifi
+                                size={15}
+                                className="text-green-500"
+                            />
+
+                            <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                                Active
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <Wifi
+                                size={15}
+                                className="text-gray-400"
+                            />
+
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                Offline
+                            </span>
+                        </>
+                    )}
+                </div>
+            </div>
+        );
+    })}
+</div>
 
             )}
 

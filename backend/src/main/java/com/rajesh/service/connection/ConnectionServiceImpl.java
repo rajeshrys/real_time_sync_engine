@@ -8,8 +8,7 @@ import com.rajesh.model.Connection;
 import com.rajesh.model.User;
 import com.rajesh.repository.ConnectionRepository;
 import com.rajesh.repository.UserRepository;
-import com.rajesh.service.Presence.PresenceService;
-import com.sun.tools.jconsole.JConsoleContext;
+import com.rajesh.service.PresenceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

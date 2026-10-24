@@ -2,7 +2,7 @@ import { Client, type IMessage } from "@stomp/stompjs";
 
 export interface PresenceEvent {
     userId: number;
-    username: string;
+    email: string;
     status: "ONLINE" | "OFFLINE";
 }
 
