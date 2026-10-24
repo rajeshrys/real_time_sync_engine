@@ -16,13 +16,14 @@ import type {
   RegisterRequest,
   User
 } from "../api/authApi";
+import { stopPresence } from "../services/presenceWebsocket";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
-  logout: () => void;
+   logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -83,11 +84,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     await registerApi(data);
   };
 
-  const logout = async () => {
+const logout = async () => {
+    await stopPresence();
 
     localStorage.removeItem("accessToken");
     setUser(null);
-  };
+};
 
   return (
     <AuthContext.Provider
