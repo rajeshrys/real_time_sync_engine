@@ -1,10 +1,8 @@
-package com.rajesh.service.documents;
+package com.rajesh.service.documents.documentaccess;
 
 import com.rajesh.enums.DocumentRole;
 import com.rajesh.model.Document;
 import com.rajesh.model.User;
-
-import javax.print.Doc;
 
 
 public interface DocumentAccessService {

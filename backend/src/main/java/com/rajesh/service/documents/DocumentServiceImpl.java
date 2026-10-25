@@ -3,9 +3,12 @@ package com.rajesh.service.documents;
 import com.rajesh.dto.Documents.CreateDocumentRequest;
 import com.rajesh.dto.Documents.UpdateDocumentRequest;
 import com.rajesh.model.Document;
+import com.rajesh.model.DocumentMember;
 import com.rajesh.model.User;
+import com.rajesh.repository.DocumentMemberRepository;
 import com.rajesh.repository.DocumentRepository;
 import com.rajesh.repository.UserRepository;
+import com.rajesh.service.documents.documentaccess.DocumentAccessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.security.core.Authentication;
@@ -15,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,8 @@ public class DocumentServiceImpl implements DocumentService{
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final DocumentAccessService documentAccessService;
+    private final DocumentMemberRepository documentMemberRepository;
 
     public Document createDocument(CreateDocumentRequest request) throws Exception {
         String contentJson;
@@ -58,42 +64,79 @@ public class DocumentServiceImpl implements DocumentService{
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Long ownerId = user.getId();
+        
+        List<Document> ownedDocuments =
+                documentRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
 
-        return documentRepository
-                .findByOwnerIdAndDeletedAtIsNull(ownerId);
+        List<Document> sharedDocuments =
+                documentMemberRepository
+                        .findByUserAndDocument_DeletedAtIsNull(user)
+                        .stream()
+                        .map(DocumentMember::getDocument)
+                        .toList();
+
+        return Stream.concat(
+                        ownedDocuments.stream(),
+                        sharedDocuments.stream()
+                )
+                .distinct()
+                .toList();
     }
 
     public Document getDocumentById(Long id) {
 
-        return documentRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Document not found with id: " + id)
-                );
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new RuntimeException("User not found"));
+        Document document = documentRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("Document not found with id:"+id));
+        if(!documentAccessService.canRead(document,user)){
+            throw new RuntimeException("You do not have access to this document");
+        }
+
+        return document;
     }
 
+    @Override
     public Document updateDocument(
             Long id,
             UpdateDocumentRequest request
     ) {
-        String contentJson;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(()->new RuntimeException("user not found"));
 
-        Long ownerId = user.getId();
-        try {
-            contentJson = objectMapper.writeValueAsString(request.getContent());
-        }catch (JsonParseException e ){
-            try {
-                throw new Exception("failed to convert document content",e);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found")
+                );
+
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Document not found")
+                );
+
+        if (!documentAccessService.canEdit(document, user)) {
+            throw new RuntimeException(
+                    "You do not have permission to edit this document"
+            );
         }
-        Document document = documentRepository
-                .findByIdAndOwnerId(id, ownerId)
-                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        String contentJson;
+
+        try {
+            contentJson =
+                    objectMapper.writeValueAsString(request.getContent());
+
+        } catch (JsonParseException e) {
+            throw new RuntimeException(
+                    "Failed to convert document content",
+                    e
+            );
+        }
 
         document.setTitle(request.getTitle());
         document.setContent(contentJson);

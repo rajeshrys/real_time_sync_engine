@@ -1,4 +1,4 @@
-package com.rajesh.service.documents;
+package com.rajesh.service.documents.documentaccess;
 
 import com.rajesh.enums.DocumentRole;
 import com.rajesh.model.Document;
@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class DocumentAccessServiceImpl implements  DocumentAccessService{
+public class DocumentAccessServiceImpl implements DocumentAccessService {
     private final DocumentMemberRepository documentMemberRepository;
+    private final DocumentAccessService documentAccessService;
 
     @Override
     public DocumentRole getRole(Document document, User user) {

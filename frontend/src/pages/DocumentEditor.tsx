@@ -9,6 +9,7 @@ import {
   Check,
   AlertCircle,
   Save,
+  UserPlus,
 } from "lucide-react";
 
 import TiptapEditor from "../components/TiptapEditor";
@@ -19,6 +20,7 @@ import {
   permanentlyDeleteDocument,
 } from "../api/documentApi";
 import ThemeToggle from "../components/ThemeToggle";
+import ShareDocumentModal from "../components/ShareDocumentModal";
 
 type Status = {
   type: "success" | "error";
@@ -38,6 +40,7 @@ const DocumentEditor = () => {
   const [deleting, setDeleting] = useState(false);
   const [status, setStatus] = useState<Status>(null);
   const [isTrashed, setIsTrashed] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   /* Load an existing document */
   useEffect(() => {
@@ -246,6 +249,23 @@ const DocumentEditor = () => {
               className="min-w-0 flex-1 rounded-xl border border-transparent bg-transparent px-2.5 py-1 text-lg font-semibold tracking-tight text-slate-900 placeholder-slate-400 outline-none transition hover:border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-100 dark:placeholder-slate-500 dark:hover:border-slate-700 dark:focus:border-blue-400"
             />
           </div>
+
+          {/* share button */}
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-gray-100"
+          >
+            <UserPlus size={18} />
+
+            Share
+          </button>
+
+                  {showShareModal && (
+          <ShareDocumentModal
+            documentId={Number(documentId)}
+            onClose={() => setShowShareModal(false)}
+          />
+        )}
 
           {/* Actions & Status */}
           <div className="flex items-center gap-2">

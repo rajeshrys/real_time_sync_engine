@@ -1,3 +1,4 @@
+export type DocumentRole = "OWNER" | "EDITOR" | "VIEWER";
 export interface Document{
     id: number;
     title: string;
@@ -26,3 +27,19 @@ export interface DocumentResponse {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface ShareDocumentRequest {
+    userId: number;
+    role: DocumentRole;
+}
+
+export interface DocumentMember{
+    userId: number;
+    userName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: DocumentRole;
+}
+
+
