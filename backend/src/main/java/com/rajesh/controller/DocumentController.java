@@ -2,11 +2,13 @@ package com.rajesh.controller;
 
 
 import com.rajesh.dto.Documents.CreateDocumentRequest;
+import com.rajesh.dto.Documents.SharedDocumentResponse;
 import com.rajesh.dto.Documents.UpdateDocumentRequest;
 import com.rajesh.model.Document;
 import com.rajesh.service.documents.DocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,10 +30,10 @@ public class DocumentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Document>> getAllDocuments() {
-
+    public ResponseEntity<List<Document>> getAllDocuments(Authentication authentication) {
+        String currentUserEmail = authentication.getName();
         return ResponseEntity.ok(
-                documentService.getAllDocuments()
+                documentService.getAllDocuments(currentUserEmail)
         );
     }
 
@@ -87,6 +89,13 @@ public class DocumentController {
         documentService.permanentlyDeleteDocument(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/shared-with-me")
+    public ResponseEntity<List<SharedDocumentResponse>> getSharedDocuments (Authentication authentication){
+        String currentUserEmail = authentication.getName();
+        List<SharedDocumentResponse> documents = documentService.getSharedDocuments(currentUserEmail);
+        return ResponseEntity.ok(documents);
     }
 
 }

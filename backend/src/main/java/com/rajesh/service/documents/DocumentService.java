@@ -1,6 +1,7 @@
 package com.rajesh.service.documents;
 
 import com.rajesh.dto.Documents.CreateDocumentRequest;
+import com.rajesh.dto.Documents.SharedDocumentResponse;
 import com.rajesh.dto.Documents.UpdateDocumentRequest;
 import com.rajesh.model.Document;
 
@@ -11,7 +12,7 @@ public interface DocumentService {
 
     Document createDocument(CreateDocumentRequest request) throws Exception;
 
-    List<Document> getAllDocuments();
+    List<Document> getAllDocuments(String currentUserEmail);
 
     Document getDocumentById(Long id);
 
@@ -24,4 +25,6 @@ public interface DocumentService {
     void restoreDocument(Long id);
 
     void permanentlyDeleteDocument(Long id);
+
+    List<SharedDocumentResponse> getSharedDocuments(String currentUserEmail);
 }

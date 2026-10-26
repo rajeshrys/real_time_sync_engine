@@ -16,6 +16,7 @@ import java.util.List;
 public class DocumentShareController {
     private final DocumentShareService documentShareService;
 
+    @PostMapping("/{documentId}/members")
     public ResponseEntity<DocumentMemberResponse> shareDocument(@PathVariable
                                                                 Long documentId,
                                                                 @RequestBody ShareDocumentRequest request,

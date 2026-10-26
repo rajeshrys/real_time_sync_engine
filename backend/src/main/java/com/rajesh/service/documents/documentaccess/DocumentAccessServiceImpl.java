@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DocumentAccessServiceImpl implements DocumentAccessService {
     private final DocumentMemberRepository documentMemberRepository;
-    private final DocumentAccessService documentAccessService;
 
     @Override
     public DocumentRole getRole(Document document, User user) {

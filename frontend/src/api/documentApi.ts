@@ -1,6 +1,6 @@
 import api from "./axios";
 
-import type { Document,CreateDocumentRequest,UpdateDocumentRequest ,DocumentResponse} from "../types/document";
+import { type Document,type CreateDocumentRequest,type UpdateDocumentRequest ,type DocumentResponse} from "../types/document";
 
 export const createDocument = async(data: CreateDocumentRequest): Promise<Document> =>{
     const response = await api.post<Document>("/documents/new",data);
@@ -54,3 +54,4 @@ export const permanentlyDeleteDocument = async (
 ): Promise<void> => {
   await api.delete(`/documents/${id}/permanent`);
 };
+

@@ -28,8 +28,17 @@ export interface DocumentResponse {
   updatedAt?: string;
 }
 
+export interface SharedDocument {
+      id: number;
+  title: string;
+  content: string;
+  ownerId: number;
+  role: "EDITOR" | "VIEWER";
+  ownerUsername: string | null;
+}
+
 export interface ShareDocumentRequest {
-    userId: number;
+    username: string;
     role: DocumentRole;
 }
 

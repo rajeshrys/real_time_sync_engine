@@ -1,6 +1,7 @@
 package com.rajesh.service.documents;
 
 import com.rajesh.dto.Documents.CreateDocumentRequest;
+import com.rajesh.dto.Documents.SharedDocumentResponse;
 import com.rajesh.dto.Documents.UpdateDocumentRequest;
 import com.rajesh.model.Document;
 import com.rajesh.model.DocumentMember;
@@ -18,7 +19,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -54,34 +54,18 @@ public class DocumentServiceImpl implements DocumentService{
         return documentRepository.save(document);
     }
 
-    public List<Document> getAllDocuments() {
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+    @Override
+    public List<Document> getAllDocuments(String currentUserEmail) {
 
-        String email = authentication.getName();
+        User user = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found" + currentUserEmail)
+                );
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Long ownerId = user.getId();
-        
-        List<Document> ownedDocuments =
-                documentRepository.findByOwnerIdAndDeletedAtIsNull(user.getId());
-
-        List<Document> sharedDocuments =
-                documentMemberRepository
-                        .findByUserAndDocument_DeletedAtIsNull(user)
-                        .stream()
-                        .map(DocumentMember::getDocument)
-                        .toList();
-
-        return Stream.concat(
-                        ownedDocuments.stream(),
-                        sharedDocuments.stream()
-                )
-                .distinct()
-                .toList();
+        return documentRepository
+                .findByOwnerIdAndDeletedAtIsNull(user.getId());
     }
+
 
     public Document getDocumentById(Long id) {
 
@@ -229,6 +213,36 @@ public class DocumentServiceImpl implements DocumentService{
         }
 
         documentRepository.delete(document);
+    }
+
+    @Override
+    public List<SharedDocumentResponse> getSharedDocuments(String currentUserEmail) {
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(()->
+                        new RuntimeException("User not found" ));
+
+        List<DocumentMember> memberships = documentMemberRepository.findByUserAndDocument_DeletedAtIsNull(currentUser);
+
+        return memberships.stream()
+                .map(member ->{
+                    Document document = member.getDocument();
+                    User owner = userRepository.findById(document.getOwnerId())
+                            .orElse(null);
+                    return SharedDocumentResponse.builder()
+                            .id(document.getId())
+                            .title(document.getTitle())
+                            .content(document.getContent())
+                            .ownerId(document.getOwnerId())
+                            .role(member.getRole().name())
+                            .ownerUsername(
+                                    owner != null
+                                            ? owner.getUsername()
+                                            : null
+                            )
+                            .build();
+                })
+                .toList();
+
     }
 
 }

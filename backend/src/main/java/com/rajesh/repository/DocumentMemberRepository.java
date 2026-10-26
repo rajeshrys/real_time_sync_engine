@@ -18,4 +18,6 @@ public interface DocumentMemberRepository extends JpaRepository<DocumentMember,L
     List<DocumentMember> findByUserAndDocument_DeletedAtIsNull(User user);
 
     void deleteByDocumentAndUser(Document document,User user);
+
+
 }

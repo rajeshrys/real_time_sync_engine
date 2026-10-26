@@ -253,7 +253,7 @@ const DocumentEditor = () => {
           {/* share button */}
           <button
             onClick={() => setShowShareModal(true)}
-            className="flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-gray-100"
+            className="flex top-1 items-center gap-2 rounded-lg border px-3 py-2 hover:bg-gray-100"
           >
             <UserPlus size={18} />
 

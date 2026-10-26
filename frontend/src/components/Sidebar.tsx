@@ -11,6 +11,7 @@ import {
   User
 } from "lucide-react";
 
+
 import { useAuth } from "../hooks/useAuth";
 import { useEffect, useState } from "react";
 import { getDocuments } from "../api/documentApi";
@@ -43,6 +44,7 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
   const [recentDocuments, setRecentDocuments] = useState<DocumentResponse[]>([]);
   const [loadingDocuments, setLoadingDocuments] = useState(true);
 
+
   const { user, logout } = useAuth() as ReturnType<typeof useAuth> & {
     logout?: () => void | Promise<void>;
   };
@@ -56,6 +58,8 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
     navigate("/login", { replace: true });
     localStorage.removeItem("accessToken");
   };
+
+
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -139,6 +143,7 @@ const Sidebar = ({ open, onClose }: SidebarProps) => {
             </NavLink>
           ))}
         </nav>
+
 
         {/* Recents */}
         <div className="mt-5 min-h-0 flex-1 overflow-y-auto px-3">

@@ -25,36 +25,90 @@ public class DocumentShareServiceImpl implements DocumentShareService {
     private final DocumentAccessService documentAccessService;
 
     @Override
-    public DocumentMemberResponse shareDocument(Long documentId, String currentUserEmail, ShareDocumentRequest request) {
-        User currentUser = userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(()->new RuntimeException("Current user not found"));
-        Document document = documentRepository.findById(documentId).orElseThrow(()->new RuntimeException("Document not found"));
+    public DocumentMemberResponse shareDocument(
+            Long documentId,
+            String currentUserEmail,
+            ShareDocumentRequest request
+    ) {
 
-        if(request.getUserId()==null){
-            throw new RuntimeException("User Id is required");
+        // 1. Get the currently logged-in user
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() ->
+                        new RuntimeException("Current user not found")
+                );
+
+        // 2. Get the document
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() ->
+                        new RuntimeException("Document not found")
+                );
+
+        // 3. Validate username
+        if (request.getUsername() == null ||
+                request.getUsername().trim().isEmpty()) {
+
+            throw new RuntimeException("Username is required");
         }
-        if(request.getRole()==null){
+
+        // 4. Validate role
+        if (request.getRole() == null) {
+
             throw new RuntimeException("Document role is required");
         }
-        if(document.getOwnerId().equals(request.getUserId())){
-            throw new RuntimeException("The document owner already has full access");
+
+        // 5. Only the document owner can share the document
+        if (!document.getOwnerId().equals(currentUser.getId())) {
+
+            throw new RuntimeException(
+                    "Only the document owner can share this document"
+            );
         }
-        User userToShare = userRepository.findById(request.getUserId())
-                .orElseThrow(()->new RuntimeException("User to share with not found"));
-        if(documentMemberRepository
-                .findByDocumentAndUser(document,userToShare)
-                .isPresent()){
-            throw new RuntimeException("User already has accesss in this document");
+
+        // 6. Find the user using username
+        User userToShare = userRepository.findByUsername(
+                request.getUsername().trim()
+        ).orElseThrow(() ->
+                new RuntimeException("User to share with not found")
+        );
+
+        // 7. Don't allow sharing with the owner
+        if (document.getOwnerId().equals(userToShare.getId())) {
+
+            throw new RuntimeException(
+                    "The document owner already has full access"
+            );
         }
-        if(request.getRole() == DocumentRole.OWNER){
-            throw new RuntimeException("OWNER role cannot be assigned through document sharing");
+
+        // 8. Don't allow OWNER role through sharing
+        if (request.getRole() == DocumentRole.OWNER) {
+
+            throw new RuntimeException(
+                    "OWNER role cannot be assigned through document sharing"
+            );
         }
+
+        // 9. Check whether the user already has access
+        if (documentMemberRepository
+                .findByDocumentAndUser(document, userToShare)
+                .isPresent()) {
+
+            throw new RuntimeException(
+                    "User already has access to this document"
+            );
+        }
+
+        // 10. Create document membership
         DocumentMember member = DocumentMember.builder()
                 .document(document)
                 .user(userToShare)
                 .role(request.getRole())
                 .build();
-        DocumentMember savedMember = documentMemberRepository.save(member);
+
+        // 11. Save
+        DocumentMember savedMember =
+                documentMemberRepository.save(member);
+
+        // 12. Convert entity to response DTO
         return toResponse(savedMember);
     }
 

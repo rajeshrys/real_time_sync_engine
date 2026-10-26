@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ShareDocumentRequest {
-    private Long userId;
+    private String username;
     private DocumentRole role;
 }
