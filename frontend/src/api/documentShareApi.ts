@@ -1,6 +1,6 @@
 import api from "./axios";
 
-import type { DocumentMember,ShareDocumentRequest, SharedDocument } from "../types/document";
+import type { DocumentMember,ShareDocumentRequest} from "../types/document";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
@@ -11,12 +11,6 @@ const getAuthHeaders = () => {
   };
 };
 
-export const getSharedDocuments = async()=>{
-  const response = await api.get<SharedDocument[]>(
-    "/documents/shared-with-me"
-  );
-  return response.data;
-}
 
 export const getDocumentMembers = async (
   documentId: number

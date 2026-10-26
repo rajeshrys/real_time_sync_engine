@@ -17,10 +17,11 @@ import { useAuth } from "../hooks/useAuth";
 import {
   getDocuments,
   getTrashDocuments,
+  getSharedDocuments,
   permanentlyDeleteDocument,
   restoreDocument,
 } from "../api/documentApi";
-import { type DocumentResponse } from "../types/document";
+import { type DocumentResponse,type SharedDocument } from "../types/document";
  
 
 type View = "mine" | "shared" | "trash";
@@ -66,6 +67,7 @@ const Dashboard = ({ view = "mine" }: { view?: View }) => {
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [trashDocuments, setTrashDocuments] = useState<DocumentResponse[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sharedDocuments, setSharedDocuments] = useState<SharedDocument[]>([]);
 
   const handlePermanentDelete = async (id: number) => {
     const confirmed = window.confirm(
@@ -106,8 +108,17 @@ const Dashboard = ({ view = "mine" }: { view?: View }) => {
           const data = await getTrashDocuments();
           setTrashDocuments(data);
         } else if (view === "shared") {
-          // If a shared endpoint exists or filtered
-          setDocuments([]);
+          const data= await getSharedDocuments();
+          setDocuments(
+          data.map((document) => ({
+            id: document.id,
+            title: document.title,
+            content: null,
+            ownerId: document.ownerId,
+            createdAt: "",
+            updatedAt: "",
+          }))
+        );
         }
       } catch (error) {
         console.error("Failed to fetch documents:", error);
