@@ -1,27 +1,23 @@
 import api from "./axios";
+import type { DocumentMember, ShareDocumentRequest } from "../types/document";
 
-import type { DocumentMember,ShareDocumentRequest} from "../types/document";
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
-
-  return {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
+export const shareDocument = async (
+  documentId: number,
+  data: ShareDocumentRequest
+): Promise<DocumentMember> => {
+  const response = await api.post<DocumentMember>(
+    `/documents/share/${documentId}/members`,
+    data
+  );
+  return response.data;
 };
-
 
 export const getDocumentMembers = async (
   documentId: number
 ): Promise<DocumentMember[]> => {
-  const response = await api.get(
-    `documents/share//${documentId}/members`,
-    {
-      headers: getAuthHeaders(),
-    }
+  const response = await api.get<DocumentMember[]>(
+    `/documents/share/${documentId}/members`
   );
-
   return response.data;
 };
 
@@ -30,14 +26,10 @@ export const updateMemberRole = async (
   userId: number,
   role: "EDITOR" | "VIEWER"
 ): Promise<DocumentMember> => {
-  const response = await api.put(
-    `documents/share/${documentId}/members/${userId}`,
-    { role },
-    {
-      headers: getAuthHeaders(),
-    }
+  const response = await api.put<DocumentMember>(
+    `/documents/share/${documentId}/members/${userId}`,
+    { role }
   );
-
   return response.data;
 };
 
@@ -46,9 +38,6 @@ export const removeMember = async (
   userId: number
 ): Promise<void> => {
   await api.delete(
-    `documents/share/${documentId}/members/${userId}`,
-    {
-      headers: getAuthHeaders(),
-    }
+    `/documents/share/${documentId}/members/${userId}`
   );
 };
