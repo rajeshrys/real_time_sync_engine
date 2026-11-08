@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ProjectManagmentSystemApplication {
+public class RealTimeSyncEngineApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ProjectManagmentSystemApplication.class, args);
+		SpringApplication.run(RealTimeSyncEngineApplication.class, args);
 	}
 
 }

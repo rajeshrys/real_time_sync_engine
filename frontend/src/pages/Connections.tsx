@@ -10,7 +10,7 @@ export default function Connections() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [connectingUserId, setConnectingUserId] = useState<number | null>(null);
-  const [connections,setConnections ] = useState<ConnectionMember[]>([]);
+  const [_connections, setConnections] = useState<ConnectionMember[]>([]);
 
   const searchRequestId = useRef(0);
 

@@ -9,12 +9,14 @@ import {
   getCurrentUser,
   login as loginApi,
   register as registerApi,
+  logoutApi,
+  refreshTokenApi,
 } from "../api/authApi";
 
 import type {
   LoginRequest,
   RegisterRequest,
-  User
+  User,
 } from "../api/authApi";
 import { stopPresence } from "../services/presenceWebsocket";
 
@@ -23,7 +25,7 @@ interface AuthContextType {
   loading: boolean;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
-   logout: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -40,7 +42,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = localStorage.getItem("accessToken");
+      let token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        try {
+          const refreshRes = await refreshTokenApi();
+          token = refreshRes.accessToken || refreshRes.token || null;
+          if (token) {
+            localStorage.setItem("accessToken", token);
+          }
+        } catch {
+          // No active session cookie
+          setLoading(false);
+          return;
+        }
+      }
 
       if (!token) {
         setLoading(false);
@@ -60,14 +76,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     initializeAuth();
+
+    const handleAuthLogout = () => {
+      setUser(null);
+      stopPresence();
+    };
+
+    window.addEventListener("auth:logout", handleAuthLogout);
+    return () => {
+      window.removeEventListener("auth:logout", handleAuthLogout);
+    };
   }, []);
 
   const login = async (data: LoginRequest) => {
     const response = await loginApi(data);
 
-    const token =
-      response.accessToken ??
-      response.token;
+    const token = response.accessToken ?? response.token;
 
     if (!token) {
       throw new Error("No JWT token received from server.");
@@ -76,7 +100,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.setItem("accessToken", token);
 
     const currentUser = await getCurrentUser();
-
     setUser(currentUser);
   };
 
@@ -84,12 +107,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     await registerApi(data);
   };
 
-const logout = async () => {
-    await stopPresence();
-
-    localStorage.removeItem("accessToken");
-    setUser(null);
-};
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.error("Failed to logout on server:", error);
+    } finally {
+      await stopPresence();
+      localStorage.removeItem("accessToken");
+      setUser(null);
+    }
+  };
 
   return (
     <AuthContext.Provider

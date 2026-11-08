@@ -5,7 +5,6 @@ import {
     UserCircle,
     Loader2,
     Wifi,
-    WifiOff,
 } from "lucide-react";
 
 import {

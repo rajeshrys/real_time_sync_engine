@@ -14,6 +14,15 @@ export const connectToDocument = (
 
     reconnectDelay: 5000,
 
+    beforeConnect: () => {
+      const currentToken = localStorage.getItem("accessToken");
+      if (client) {
+        client.connectHeaders = currentToken
+          ? { Authorization: `Bearer ${currentToken}` }
+          : {};
+      }
+    },
+
     connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
 
     onConnect: () => {

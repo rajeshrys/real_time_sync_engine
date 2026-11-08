@@ -21,7 +21,7 @@ import {
   permanentlyDeleteDocument,
   restoreDocument,
 } from "../api/documentApi";
-import { type DocumentResponse,type SharedDocument } from "../types/document";
+import { type DocumentResponse } from "../types/document";
  
 
 type View = "mine" | "shared" | "trash";
@@ -67,7 +67,6 @@ const Dashboard = ({ view = "mine" }: { view?: View }) => {
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [trashDocuments, setTrashDocuments] = useState<DocumentResponse[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sharedDocuments, setSharedDocuments] = useState<SharedDocument[]>([]);
 
   const handlePermanentDelete = async (id: number) => {
     const confirmed = window.confirm(
